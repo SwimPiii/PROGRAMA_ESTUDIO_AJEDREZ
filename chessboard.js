@@ -168,9 +168,10 @@ let quizActive = false; // si está esperando la jugada del usuario
 let quizMoves = null;   // array de { idx:1..3, san: 'e4', score: {type:'cp'|'mate', value:number} }
 let quizPendingAnalysis = false; // evita mover antes de que termine el análisis de 10s
 // --- TIMER ---
-let timerValue = 30; // segundos por ejercicio
+let timerValue = 120; // segundos por ejercicio
 let timerCurrent = 0;
 let timerInterval = null;
+
 const timerEl = document.getElementById('timer');
 const timerInput = document.getElementById('timer-input');
 function updateTimerDisplay() {
@@ -204,16 +205,24 @@ function resetTimer() {
     timerCurrent = timerValue;
     updateTimerDisplay();
 }
+function updateTimerFromInput() {
+    let v = parseInt(timerInput.value);
+    if (isNaN(v) || v < 5) v = 30;
+    timerValue = v;
+    timerCurrent = v;
+    timerInput.value = v;
+    updateTimerDisplay();
+}
 if (timerInput) {
-    timerInput.addEventListener('change', () => {
-        let v = parseInt(timerInput.value);
-        if (isNaN(v) || v < 5) v = 5;
-        if (v > 300) v = 300;
-        timerValue = v;
-        timerInput.value = v;
-        resetTimer();
-    });
-    timerValue = parseInt(timerInput.value) || 30;
+    timerInput.addEventListener('change', updateTimerFromInput);
+    timerInput.addEventListener('input', updateTimerFromInput);
+    // Forzar valor inicial seguro en todos los navegadores
+    let v = parseInt(timerInput.value);
+    if (isNaN(v) || v < 5) v = 30;
+    timerInput.value = v;
+    timerValue = v;
+    timerCurrent = v;
+    updateTimerDisplay();
 }
 resetTimer();
 
@@ -306,13 +315,34 @@ document.addEventListener('click', async function(e) {
                 // Si está activo el quiz, evaluar jugada con el motor y comparar valoración
                 if (quizActive && Array.isArray(quizMoves) && quizMoves.length) {
                     try {
-                        const postFen = chess.fen();
-                        // Análisis post-movimiento: 10s, MultiPV=1, sobre la posición resultante
-                        const res = await analyzeWithStockfishStreaming(10000, 1, null, postFen);
-                        let userScore = (res && res[0] && res[0].score) ? res[0].score : null;
-                        // Convertir a la perspectiva del jugador que acaba de mover
-                        userScore = normalizeToPlayerPerspective(userScore);
-                        // Mostrar en la caja de análisis la valoración de la jugada del usuario
+                        // Si la jugada del usuario coincide con la mejor jugada (SAN), usar directamente el score de la PV principal
+                        let userScore = null;
+                        let usedPV = null;
+                        if (quizMoves && quizMoves[0] && quizMoves[0].san === playedSAN) {
+                            userScore = quizMoves[0].score;
+                            usedPV = quizMoves[0];
+                        } else {
+                            // Buscar si coincide con alguna de las otras PV
+                            const found = quizMoves.find(e => e.san === playedSAN);
+                            if (found) {
+                                userScore = found.score;
+                                usedPV = found;
+                            } else {
+                                // Si no coincide, analizar la jugada sobre el FEN base
+                                let fenBase = (quizMoves && quizMoves.fen) ? quizMoves.fen : null;
+                                let fenUser = chess.fen();
+                                if (fenBase) {
+                                    const tmpChess = new Chess(fenBase);
+                                    tmpChess.move(playedSAN);
+                                    const res = await analyzeWithStockfishStreaming(10000, 1, null, tmpChess.fen());
+                                    userScore = (res && res[0] && res[0].score) ? res[0].score : null;
+                                } else {
+                                    const res = await analyzeWithStockfishStreaming(10000, 1, null, fenUser);
+                                    userScore = (res && res[0] && res[0].score) ? res[0].score : null;
+                                }
+                                userScore = normalizeToPlayerPerspective(userScore);
+                            }
+                        }
                         if (analysisBox && userScore) {
                             const normStr = userScore.type === 'cp' ? (userScore.value/100).toFixed(2) : ('#' + userScore.value);
                             const line = `Tu jugada: ${playedSAN} | ${normStr}`;
@@ -339,7 +369,6 @@ document.addEventListener('click', async function(e) {
                             showModal(`Incorrecto!\nLa mejor era: ${alts}`);
                         }
                     } catch (_) {
-                        // Si falla el análisis, considerar incorrecto conservadoramente
                         setScore(score - 10);
                         const alts = quizMoves.map(e => e.san).join(', ');
                         showModal(`Incorrecto!\nLa mejor era: ${alts}`);
@@ -534,8 +563,9 @@ btnRandom.addEventListener('click', async () => {
     parts[1] = (getOrientation() === 'b') ? 'b' : 'w';
         const forcedFen = parts.join(' ');
     const results = await analyzeWithStockfishStreaming(10000, 3, updateAnalysisBox, forcedFen);
-        // Guardar top-3 para comparación
-        quizMoves = results;
+    // Guardar top-3 para comparación y el FEN base para análisis posterior
+    quizMoves = results;
+    if (quizMoves) quizMoves.fen = forcedFen;
         quizActive = true;
         quizPendingAnalysis = false;
     dbStatus.textContent = 'Elige tu movimiento';

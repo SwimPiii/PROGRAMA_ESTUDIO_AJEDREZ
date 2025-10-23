@@ -9,7 +9,10 @@
     --border: #475166;
 }
 body {
-    background: var(--bg);
+    background:
+        radial-gradient(circle at 50% 40%, rgba(31,34,39,0.92) 0%, rgba(31,34,39,0.92) 250px, rgba(31,34,39,0.85) 400px, rgba(31,34,39,0.7) 600px, rgba(31,34,39,0.5) 900px, rgba(31,34,39,0.3) 1200px, transparent 1800px),
+        url('background-ajedrez.png') no-repeat center center fixed;
+    background-size: cover;
     color: var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     margin: 0;

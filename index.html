@@ -13,7 +13,7 @@
             <div id="score-bar" style="text-align:center;margin-bottom:8px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:18px;">
                 <span>Puntuación: <span id="score">1000</span></span>
                 <span id="timer" class="timer-badge">00:00</span>
-                <input id="timer-input" type="number" min="5" max="300" value="30" style="width:60px;" title="Segundos por ejercicio">
+                <input id="timer-input" type="number" min="5" value="120" style="width:60px;" title="Segundos por ejercicio">
             </div>
             <div class="board-wrap">
                 <div id="chessboard"></div>
@@ -28,14 +28,14 @@
                 <input type="text" id="interval" placeholder="Intervalo">
                 <label style="display:flex;align-items:center;gap:8px;user-select:none">
                     <input type="checkbox" id="black-bottom">
-                    Negras abajo
+                    Rotar tablero
                 </label>
                 <label style="display:flex;align-items:center;gap:8px;user-select:none">
                     <input type="checkbox" id="toggle-log" checked>
                     Visualizar partida completa
                 </label>
                 <label style="display:flex;align-items:center;gap:8px;user-select:none">
-                    <input type="checkbox" id="toggle-analysis" checked>
+                    <input type="checkbox" id="toggle-analysis">
                     Mostrar mejores movimientos
                 </label>
                 
