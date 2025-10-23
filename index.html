@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainning Chess</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container main-flex" style="display: flex; flex-direction: row; gap: 32px; align-items: flex-start; width: 100%; max-width: 1100px; margin: 30px auto; background: #333; border-radius: 12px; box-shadow: 0 4px 24px #0008; padding: 24px 16px 16px 16px;">
+        <div style="flex: 1 1 0; min-width: 340px; max-width: 480px;">
+            <h1>Trainning Chess</h1>
+            <div id="score-bar" style="text-align:center;margin-bottom:8px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:18px;">
+                <span>Puntuación: <span id="score">1000</span></span>
+                <span id="timer" class="timer-badge">00:00</span>
+                <input id="timer-input" type="number" min="5" max="300" value="30" style="width:60px;" title="Segundos por ejercicio">
+            </div>
+            <div class="board-wrap">
+                <div id="chessboard"></div>
+                <div id="board-files" class="coord-file"></div>
+                <div id="board-ranks" class="coord-rank"></div>
+            </div>
+            <div class="controls">
+                <button id="btn-db" class="btn btn-outline">Cargar Base de datos</button>
+                <input type="file" id="db-file" style="display:none">
+                <button id="btn-analysis" class="btn btn-primary">Análisis</button>
+                <button id="btn-random" class="btn btn-secondary">Posición aleatoria</button>
+                <input type="text" id="interval" placeholder="Intervalo">
+                <label style="display:flex;align-items:center;gap:8px;user-select:none">
+                    <input type="checkbox" id="black-bottom">
+                    Negras abajo
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;user-select:none">
+                    <input type="checkbox" id="toggle-log" checked>
+                    Visualizar partida completa
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;user-select:none">
+                    <input type="checkbox" id="toggle-analysis" checked>
+                    Mostrar mejores movimientos
+                </label>
+                
+                <!-- Eliminado control de motor juega -->
+                <div id="db-status" class="db-status"></div>
+            </div>
+        </div>
+        <div class="log-panel" style="flex: 1.2 1 0; min-width: 380px; max-width: 600px; margin-left: 24px;">
+            <div id="log-section">
+                <h2 style="margin-top:0;">Partida completa</h2>
+                <textarea id="debug-log"></textarea>
+            </div>
+            <div id="analysis-section" style="margin-top: 12px;">
+                <h2>Mejores movimientos</h2>
+                <textarea id="analysis-box" readonly></textarea>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./chess-bridge.js"></script>
+    <script defer src="chessboard.js"></script>
+    <!-- Modal para resultado -->
+    <div id="modal-overlay" class="hidden" style="display:none;">
+        <div id="modal" role="dialog" aria-modal="true">
+            <div id="modal-text"></div>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="modal-accept">Aceptar</button>
+                <button id="modal-next">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

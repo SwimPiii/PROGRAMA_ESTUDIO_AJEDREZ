@@ -1,0 +1,1 @@
+Stockfish engine files go here. The project uses a web worker at engine/stockfish.js (WASM/JS build) to run UCI.

@@ -1,0 +1,16 @@
+# Archivos grandes o locales que no deben subirse
+basededatos.pgn
+
+# Cachés/temporales
+*.log
+.DS_Store
+Thumbs.db
+
+# Dependencias o binarios generados
+node_modules/
+dist/
+build/
+
+# Entornos/IDE
+.vscode/
+.idea/
